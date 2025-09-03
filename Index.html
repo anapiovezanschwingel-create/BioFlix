@@ -1,0 +1,249 @@
+<!DOCTYPE html><html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BioFlix — Catálogo de Vídeos (Biologia & Biologia Marinha)</title>
+  <meta name="description" content="BioFlix: recomendador de vídeos em HTML/CSS/JS inspirado no AluraFlix. Temática retrô com tons oliva e laranja." />
+  <link rel="preconnect" href="https://i.ytimg.com" />
+  <style>
+    :root{
+      
+      --bg:#2f3b1f;        /* oliva escuro */
+      --card:#3b4726;      /* oliva médio */
+      --chip:#4a582e;      
+      --accent:#ff8a3d;    /* laranja queimado */
+      --accent-2:#ffc388;  
+      --text:#f2f2ec;      
+      --muted:#c9caba;     
+      --radius:22px;       /* cantos bem arredondados */
+      --shadow: 0 8px 30px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.05);
+    }*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  background:radial-gradient(1200px 800px at 80% -10%, #3f4c27 0%, var(--bg) 60%);
+  color:var(--text);
+  letter-spacing:.2px;
+}
+
+.wrap{max-width:1200px;margin:0 auto;padding:28px}
+
+header{
+  display:flex;align-items:center;gap:16px;flex-wrap:wrap;justify-content:space-between
+}
+
+.brand{
+  display:flex;align-items:center;gap:12px
+}
+.logo{
+  width:46px;height:46px;border-radius:50%;
+  background:linear-gradient(145deg, var(--accent), var(--accent-2));
+  box-shadow:var(--shadow);
+  display:grid;place-items:center; font-weight:900; color:#1c1106
+}
+h1{font-size:clamp(20px,4vw,32px);margin:0}
+.tagline{opacity:.85;font-size:.95rem;margin-top:2px}
+
+.tools{display:flex;gap:10px;flex-wrap:wrap}
+.search{position:relative}
+.search input{
+  background:var(--card);border:none;color:var(--text);
+  padding:12px 40px 12px 14px;border-radius:999px;box-shadow:var(--shadow);
+  min-width:260px
+}
+.search svg{position:absolute;right:12px;top:50%;transform:translateY(-50%);opacity:.8}
+
+.chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.chip{background:var(--chip);border:1px solid rgba(255,255,255,.08);padding:8px 14px;border-radius:999px;cursor:pointer;user-select:none;box-shadow:var(--shadow);
+  transition:.2s transform, .2s background
+}
+.chip[data-active="true"]{background:linear-gradient(145deg, var(--accent), #ff9d59); color:#1a1208; font-weight:700}
+.chip:active{transform:translateY(1px)}
+
+/* grade de vídeos */
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px;margin-top:22px}
+.card{
+  grid-column: span 12;
+  background:var(--card); border:1px solid rgba(255,255,255,.06);
+  border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow);
+  position:relative;
+}
+@media(min-width:640px){.card{grid-column: span 6}}
+@media(min-width:980px){.card{grid-column: span 4}}
+
+.thumb{position:relative; aspect-ratio:16/9; overflow:hidden}
+.thumb iframe{width:100%;height:100%;border:0;display:block}
+.thumb::after{ /* brilho quente nas bordas como filme */
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background:radial-gradient(80% 70% at 70% 20%, rgba(255,138,61,.25), transparent 60%),
+             linear-gradient(to bottom, rgba(0,0,0,.0), rgba(0,0,0,.35));
+}
+
+.content{padding:14px 14px 16px}
+.title{font-weight:800; font-size:1.05rem; margin:2px 0 6px}
+.meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-size:.85rem;color:var(--muted)}
+.pill{padding:6px 10px;border-radius:999px;border:1px dashed rgba(255,255,255,.25)}
+.cta{
+  margin-left:auto; background:linear-gradient(145deg, var(--accent), #ffa86a);
+  color:#1b1208; padding:8px 12px; border-radius:12px; font-weight:800; text-decoration:none
+}
+
+footer{opacity:.75;margin:28px 0 8px;font-size:.9rem}
+
+/* toque de "fotogramas" arredondados no fundo */
+.mosaic{
+  position:fixed; inset:auto 0 0 auto; right:12px; bottom:12px; width:120px; height:160px; pointer-events:none; opacity:.08;
+  background:
+    radial-gradient(circle at 30% 30%, #ff8a3d 15px, transparent 16px) 0 0/40px 40px,
+    radial-gradient(circle at 70% 70%, #ffc388 15px, transparent 16px) 0 0/40px 40px,
+    radial-gradient(circle at 70% 30%, #ff8a3d 15px, transparent 16px) 0 0/40px 40px,
+    radial-gradient(circle at 30% 70%, #ffc388 15px, transparent 16px) 0 0/40px 40px;
+  border-radius:22px; filter:saturate(120%);
+}
+
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo">BF</div>
+        <div>
+          <h1>BioFlix</h1>
+          <div class="tagline">Catálogo de vídeos — Biologia & Biologia Marinha</div>
+        </div>
+      </div>
+      <div class="tools">
+        <div class="search">
+          <input id="search" type="search" placeholder="Pesquisar por título…" aria-label="Pesquisar" />
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M21 21l-4.3-4.3M10.5 18a7.5 7.5 0 100-15 7.5 7.5 0 000 15z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </div>
+      </div>
+    </header><div class="chips" id="chips">
+  <div class="chip" data-filter="todos" data-active="true">Todos</div>
+  <div class="chip" data-filter="Biologia Marinha">Biologia Marinha</div>
+  <div class="chip" data-filter="Oceanografia">Oceanografia</div>
+  <div class="chip" data-filter="Animais do Mar">Animais do Mar</div>
+  <div class="chip" data-filter="Ecossistemas">Ecossistemas</div>
+</div>
+
+<section class="grid" id="grid" aria-live="polite"></section>
+<footer>
+  Feito com HTML, CSS e JS — inspirado no projeto AluraFlix. | Temática visual oliva/laranja em referência ao moodboard enviado.
+</footer>
+
+  </div>
+  <div class="mosaic" aria-hidden="true"></div>  <script>
+    /*
+      ▶ Adicione/edite os vídeos abaixo. 
+      - "id" recebe o ID do YouTube (o que vem depois de v= na URL). Ex.: https://www.youtube.com/watch?v=VIDEO_ID
+      - "categoria" aceita múltiplos rótulos para funcionar com os filtros.
+      Já deixei 8 entradas. Substitua os IDs pelos vídeos que você quiser usar.
+    */
+    const videos = [
+      {
+        titulo: "Oceano Profundo: zonas e vida",
+        id: "aWmJ5DgyWPI", // SUBSTITUA se quiser
+        categoria: ["Biologia Marinha", "Ecossistemas"]
+      },
+      {
+        titulo: "Recifes de Coral: por que estão em risco?",
+        id: "3QK4mW9wXHU", // SUBSTITUA
+        categoria: ["Biologia Marinha", "Ecossistemas"]
+      },
+      {
+        titulo: "Oceanografia Física: correntes e circulação",
+        id: "k0tG7YFQH1A", // SUBSTITUA
+        categoria: ["Oceanografia"]
+      },
+      {
+        titulo: "Mamíferos Marinhos: adaptação e evolução",
+        id: "8bQ2g6gQv3M", // SUBSTITUA
+        categoria: ["Animais do Mar", "Biologia Marinha"]
+      },
+      {
+        titulo: "Plâncton: base da vida nos mares",
+        id: "0sQ1xJtYJqQ", // SUBSTITUA
+        categoria: ["Biologia Marinha", "Ecossistemas"]
+      },
+      {
+        titulo: "Marés, ondas e clima: introdução",
+        id: "t4yUo4b1m3k", // SUBSTITUA
+        categoria: ["Oceanografia"]
+      },
+      {
+        titulo: "Predadores do Oceano: tubarões e estratégias",
+        id: "lV8LZ0j7Q2A", // SUBSTITUA
+        categoria: ["Animais do Mar"]
+      },
+      {
+        titulo: "Manguezais: berçários do mar",
+        id: "mQ1s3y8eA9U", // SUBSTITUA
+        categoria: ["Ecossistemas", "Biologia Marinha"]
+      }
+    ];
+
+    // --- Renderização ---
+    const grid = document.getElementById('grid');
+    const chips = document.getElementById('chips');
+    const search = document.getElementById('search');
+
+    function yt(urlId){
+      return `https://www.youtube.com/embed/${urlId}?rel=0`;
+    }
+
+    function render(list){
+      grid.innerHTML = '';
+      if(!list.length){
+        grid.innerHTML = `<p style="grid-column:1/-1;opacity:.8">Nada encontrado 😕</p>`;
+        return;
+      }
+      list.forEach(v => {
+        const chipLine = v.categoria.map(c => `<span class="pill">${c}</span>`).join('');
+        const el = document.createElement('article');
+        el.className = 'card';
+        el.innerHTML = `
+          <div class="thumb" role="img" aria-label="${v.titulo}">
+            <iframe src="${yt(v.id)}" title="${v.titulo}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>
+          </div>
+          <div class="content">
+            <div class="meta">
+              <div class="title">${v.titulo}</div>
+              <a class="cta" target="_blank" rel="noopener" href="https://youtu.be/${v.id}">YouTube</a>
+            </div>
+            <div class="meta">${chipLine}</div>
+          </div>
+        `;
+        grid.appendChild(el);
+      });
+    }
+
+    // Filtro por chips
+    let activeFilter = 'todos';
+    chips.addEventListener('click', (e)=>{
+      const btn = e.target.closest('.chip');
+      if(!btn) return;
+      document.querySelectorAll('.chip').forEach(c => c.dataset.active = 'false');
+      btn.dataset.active = 'true';
+      activeFilter = btn.dataset.filter;
+      applyFilters();
+    });
+
+    // Busca por texto
+    search.addEventListener('input', applyFilters);
+
+    function applyFilters(){
+      const q = search.value.trim().toLowerCase();
+      const filtered = videos.filter(v => {
+        const matchChip = activeFilter === 'todos' || v.categoria.includes(activeFilter);
+        const matchText = !q || v.titulo.toLowerCase().includes(q);
+        return matchChip && matchText;
+      });
+      render(filtered);
+    }
+
+    // Inicializa
+    render(videos);
+  </script></body>
+</html>
